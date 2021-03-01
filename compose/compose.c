@@ -1241,6 +1241,60 @@ static void insert_idx(struct Menu *menu, struct AttachCtx *actx,
 }
 
 /**
+ * ungroup_attachment - Ungroup multipart attachment at specified position
+ * @param e    Email
+ * @param actx Attachment context
+ * @param aidx Index position of multipart attachment
+ */
+static void ungroup_attachment(struct Email *e, struct AttachCtx *actx, short aidx)
+{
+  struct Body *bptr = actx->idx[aidx]->body;
+  struct Body *bptr_next = bptr->next;
+  struct Body *bptr_previous = NULL;
+  int parent_type = actx->idx[aidx]->parent_type;
+
+  /* traverse attachments to find previous body pointer */
+  if (bptr != e->body)
+  {
+    for (struct Body *b = e->body; b; b = b->next)
+    {
+      if (b->next == bptr)
+      {
+        bptr_previous = b;
+        break;
+      }
+    }
+  }
+
+  /* reorder body pointers */
+  bptr = mutt_remove_multipart(bptr);
+  if (bptr_previous)
+    bptr_previous->next = bptr;
+  else
+    e->body = bptr;
+
+  for (short i = aidx + 1; i < actx->idxlen; i++)
+  {
+    actx->idx[i]->parent_type = parent_type;
+    actx->idx[i]->level -= 1;
+    if (actx->idx[i]->body->next == NULL)
+    {
+      actx->idx[i]->body->next = bptr_next;
+      break;
+    }
+  }
+
+  /* reorder actx */
+  actx->idx[aidx]->body->parts = NULL;
+  FREE(&actx->idx[aidx]->tree);
+  FREE(&actx->idx[aidx]);
+  for (short i = aidx; i < actx->idxlen - 1; i++)
+    actx->idx[i] = actx->idx[i + 1];
+  actx->idx[actx->idxlen - 1] = NULL;
+  actx->idxlen--;
+}
+
+/**
  * compose_custom_redraw - Redraw the compose menu - Implements Menu::custom_redraw()
  */
 static void compose_custom_redraw(struct Menu *menu)
@@ -2068,6 +2122,18 @@ int mutt_compose_menu(struct Email *e, struct Buffer *fcc, uint8_t flags,
         gptr->body = group;
         update_idx(menu, actx, gptr);
         menu_queue_redraw(menu, MENU_REDRAW_INDEX);
+        break;
+      }
+
+      case OP_COMPOSE_UNGROUP_ATTACHMENT:
+      {
+        if (actx->idx[menu->current]->body->type != TYPE_MULTIPART)
+        {
+          mutt_error(_("Attachment is not 'multipart'"));
+          break;
+        }
+        ungroup_attachment(e, actx, menu->current);
+        update_menu(actx, menu, false);
         break;
       }
 
