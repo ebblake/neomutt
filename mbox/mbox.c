@@ -1134,7 +1134,7 @@ static enum MxStatus mbox_mbox_check(struct Mailbox *m)
   /* fatal error */
 
   mbox_unlock_mailbox(m);
-  mx_fastclose_mailbox(m);
+  mx_fastclose_mailbox(&m);
   mutt_sig_unblock();
   mutt_error(_("Mailbox was corrupted"));
   return MX_STATUS_ERROR;
@@ -1178,7 +1178,7 @@ static enum MxStatus mbox_mbox_sync(struct Mailbox *m)
   adata->fp = freopen(mailbox_path(m), "r+", adata->fp);
   if (!adata->fp)
   {
-    mx_fastclose_mailbox(m);
+    mx_fastclose_mailbox(&m);
     mutt_error(_("Fatal error!  Could not reopen mailbox!"));
     goto fatal;
   }
@@ -1349,7 +1349,7 @@ static enum MxStatus mbox_mbox_sync(struct Mailbox *m)
   if (!fp)
   {
     mutt_sig_unblock();
-    mx_fastclose_mailbox(m);
+    mx_fastclose_mailbox(&m);
     mutt_debug(LL_DEBUG1, "unable to reopen temp copy of mailbox!\n");
     mutt_perror(mutt_buffer_string(tempfile));
     FREE(&new_offset);
@@ -1411,7 +1411,7 @@ static enum MxStatus mbox_mbox_sync(struct Mailbox *m)
                        NONULL(ShortHostname), (unsigned int) getpid());
     rename(mutt_buffer_string(tempfile), mutt_buffer_string(savefile));
     mutt_sig_unblock();
-    mx_fastclose_mailbox(m);
+    mx_fastclose_mailbox(&m);
     mutt_buffer_pretty_mailbox(savefile);
     mutt_error(_("Write failed!  Saved partial mailbox to %s"), mutt_buffer_string(savefile));
     mutt_buffer_pool_release(&savefile);
@@ -1433,7 +1433,7 @@ static enum MxStatus mbox_mbox_sync(struct Mailbox *m)
   {
     unlink(mutt_buffer_string(tempfile));
     mutt_sig_unblock();
-    mx_fastclose_mailbox(m);
+    mx_fastclose_mailbox(&m);
     mutt_error(_("Fatal error!  Could not reopen mailbox!"));
     FREE(&new_offset);
     FREE(&old_offset);
@@ -1500,7 +1500,7 @@ bail: /* Come here in case of disaster */
   if (!adata->fp)
   {
     mutt_error(_("Could not reopen mailbox"));
-    mx_fastclose_mailbox(m);
+    mx_fastclose_mailbox(&m);
     goto fatal;
   }
 
@@ -1815,11 +1815,12 @@ static enum MxStatus mbox_mbox_check_stats(struct Mailbox *m, uint8_t flags)
   {
     bool old_peek = m->peekonly;
     mx_mbox_open(m, MUTT_QUIET | MUTT_NOSORT | MUTT_PEEK);
-    mx_mbox_close(m);
-    m->peekonly = old_peek;
+    mx_mbox_close(&m);
+    if (m)
+      m->peekonly = old_peek;
   }
 
-  if (m->has_new || m->msg_new)
+  if (m && (m->has_new || m->msg_new))
     return MX_STATUS_NEW_MAIL;
   return MX_STATUS_OK;
 }
