@@ -244,6 +244,7 @@ opcodes.c
 opcodes.h
 pager/config.c
 pager/do_pager.c
+pager/functions.c
 pager/pager.c
 pager/pbar.c
 pager/private_data.c
