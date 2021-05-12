@@ -646,7 +646,9 @@ int pgp_class_application_handler(struct Body *m, struct State *s)
           }
           if (pgp_use_gpg_agent())
           {
-            mutt_need_hard_redraw();
+            //QWQ EXTERNAL
+            mutt_resize_screen();
+            window_invalidate_all();
           }
         }
 
@@ -1097,7 +1099,9 @@ static struct Body *pgp_decrypt_part(struct Body *a, struct State *s,
 
   if (pgp_use_gpg_agent())
   {
-    mutt_need_hard_redraw();
+    //QWQ EXTERNAL
+    mutt_resize_screen();
+    window_invalidate_all();
   }
 
   if (fgetc(fp_out) == EOF)

@@ -2443,9 +2443,6 @@ int mutt_pager(struct PagerView *pview)
   {
     mutt_curses_set_cursor(MUTT_CURSOR_INVISIBLE);
 
-    window_redraw(NULL);
-    pager_custom_redraw(pager_menu);
-
     const bool c_braille_friendly =
         cs_subset_bool(NeoMutt->sub, "braille_friendly");
     if (c_braille_friendly)
@@ -2458,9 +2455,6 @@ int mutt_pager(struct PagerView *pview)
     }
     else
       mutt_window_move(rd.pview->win_pbar, rd.pview->win_pager->state.cols - 1, 0);
-
-    // force redraw of the screen at every iteration of the event loop
-    mutt_refresh();
 
     //-------------------------------------------------------------------------
     // Check if information in the status bar needs an update
@@ -2558,10 +2552,9 @@ int mutt_pager(struct PagerView *pview)
 
     if (SigWinch)
     {
+      //QWQ SIGWINCH
       SigWinch = false;
       mutt_resize_screen();
-      clearok(stdscr, true); /* force complete redraw */
-      msgwin_clear_text();
 
       if (pview->flags & MUTT_PAGER_RETWINCH)
       {
@@ -2582,12 +2575,13 @@ int mutt_pager(struct PagerView *pview)
       }
       else
       {
-        /* note: mutt_resize_screen() -> mutt_window_reflow() sets
-         * MENU_REDRAW_FULL and MENU_REDRAW_FLOW */
         op = 0;
       }
       continue;
     }
+
+    //QWQ LOOP
+    window_redraw(NULL);
     //-------------------------------------------------------------------------
     // Finally, read user's key press
     //-------------------------------------------------------------------------
@@ -3126,9 +3120,9 @@ int mutt_pager(struct PagerView *pview)
         //=======================================================================
 
       case OP_REDRAW:
-        mutt_window_reflow(NULL);
-        clearok(stdscr, true);
-        menu_queue_redraw(pager_menu, MENU_REDRAW_FULL);
+        //QWQ Ctrl-L
+        mutt_resize_screen();
+        window_invalidate_all();
         break;
 
         //=======================================================================
@@ -3367,8 +3361,11 @@ int mutt_pager(struct PagerView *pview)
         //=======================================================================
 
       case OP_ENTER_COMMAND:
+        //QWQ COMMAND
         mutt_enter_command();
-        menu_queue_redraw(pager_menu, MENU_REDRAW_FULL);
+
+        mutt_resize_screen();
+        window_invalidate_all();
 
         if (OptNeedResort)
         {

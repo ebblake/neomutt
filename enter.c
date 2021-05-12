@@ -198,6 +198,8 @@ int mutt_enter_string_full(char *buf, size_t buflen, int col, CompletionFlags fl
 
   while (true)
   {
+    //QWQ LOOP
+    window_redraw(NULL);
     if (!pass)
     {
       if (redraw == ENTER_REDRAW_INIT)
@@ -230,8 +232,8 @@ int mutt_enter_string_full(char *buf, size_t buflen, int col, CompletionFlags fl
                                               state->curpos - state->begin),
                        0);
     }
-    mutt_refresh();
 
+    //QWQ SIGWINCH - handled by caller
     ch = km_dokey(MENU_EDITOR);
     if (ch < 0)
     {
@@ -698,6 +700,15 @@ int mutt_enter_string_full(char *buf, size_t buflen, int col, CompletionFlags fl
           struct KeyEvent event;
           do
           {
+            if (SigWinch)
+            {
+              //QWQ SIGWINCH
+              SigWinch = false;
+              mutt_resize_screen();
+            }
+
+            //QWQ LOOP
+            window_redraw(NULL);
             event = mutt_getch();
           } while (event.ch == -2); // Timeout
           if (event.ch >= 0)

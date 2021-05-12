@@ -1328,7 +1328,6 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
     else
     {
       index_custom_redraw(priv->menu);
-      window_redraw(NULL);
 
       /* give visual indication that the next command is a tag- command */
       if (priv->tag)
@@ -1351,20 +1350,17 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
         mutt_window_move(priv->menu->win_index, priv->menu->win_index->state.cols - 1,
                          index - priv->menu->top);
       }
-      mutt_refresh();
 
       if (SigWinch)
       {
+        //QWQ SIGWINCH
         SigWinch = false;
         mutt_resize_screen();
         priv->menu->top = 0; /* so we scroll the right amount */
-        /* force a real complete redraw.  clrtobot() doesn't seem to be able
-         * to handle every case without this.  */
-        clearok(stdscr, true);
-        msgwin_clear_text();
         continue;
       }
 
+      //QWQ LOOP
       window_redraw(NULL);
       op = km_dokey(MENU_MAIN);
 
@@ -1892,9 +1888,9 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
       }
 
       case OP_REDRAW:
-        mutt_window_reflow(NULL);
-        clearok(stdscr, true);
-        menu_queue_redraw(priv->menu, MENU_REDRAW_FULL);
+        //QWQ Ctrl-L
+        mutt_resize_screen();
+        window_invalidate_all();
         break;
 
       // Initiating a search can happen on an empty mailbox, but
@@ -3531,9 +3527,12 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
       }
 
       case OP_ENTER_COMMAND:
+        //QWQ COMMAND
         mutt_enter_command();
         mutt_check_rescore(shared->mailbox);
-        menu_queue_redraw(priv->menu, MENU_REDRAW_FULL);
+
+        mutt_resize_screen();
+        window_invalidate_all();
         break;
 
       case OP_EDIT_OR_VIEW_RAW_MESSAGE:

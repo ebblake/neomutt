@@ -71,10 +71,10 @@ static int rootwin_config_observer(struct NotifyCallback *nc)
       TAILQ_INSERT_HEAD(&win_root->children, next, entries);
 
       mutt_debug(LL_DEBUG5, "config done, request WA_REFLOW\n");
+      win_root->actions |= WA_REFLOW;
     }
   }
 
-  mutt_window_reflow(win_root);
   return 0;
 }
 

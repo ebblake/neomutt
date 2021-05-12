@@ -537,6 +537,7 @@ static void menu_redraw_prompt(struct Menu *menu)
  */
 int menu_redraw(struct Menu *menu)
 {
+  // return OP_NULL;
   if (menu->custom_redraw)
   {
     menu->custom_redraw(menu);

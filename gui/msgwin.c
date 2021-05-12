@@ -232,6 +232,7 @@ void msgwin_set_height(short height)
   else if (height > 3)
     height = 3;
 
+  //QWQ MESSAGE
   MessageWindow->req_rows = height;
   mutt_window_reflow(MessageWindow->parent);
 }

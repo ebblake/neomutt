@@ -250,6 +250,8 @@ static int menu_dialog_dokey(struct Menu *menu, int *ip)
 
   do
   {
+    //QWQ SIGWINCH - handled by caller?
+    //QWQ LOOP
     ch = mutt_getch();
   } while (ch.ch == -2); // Timeout
 
@@ -317,13 +319,14 @@ int menu_loop(struct Menu *menu)
                        menu->current - menu->top);
     }
 
-    mutt_refresh();
-
     /* try to catch dialog keys before ops */
     if (!ARRAY_EMPTY(&menu->dialog) && (menu_dialog_dokey(menu, &op) == 0))
       return op;
 
     const bool c_auto_tag = cs_subset_bool(menu->sub, "auto_tag");
+
+    //QWQ LOOP
+    window_redraw(NULL);
     op = km_dokey(menu->type);
     if ((op == OP_TAG_PREFIX) || (op == OP_TAG_PREFIX_COND))
     {
@@ -358,9 +361,9 @@ int menu_loop(struct Menu *menu)
 
     if (SigWinch)
     {
+      //QWQ SIGWINCH
       SigWinch = false;
       mutt_resize_screen();
-      clearok(stdscr, true); /* force complete redraw */
     }
 
     if (op < 0)
@@ -451,8 +454,11 @@ int menu_loop(struct Menu *menu)
         break;
 
       case OP_ENTER_COMMAND:
+        //QWQ COMMAND
         mutt_enter_command();
-        window_redraw(NULL);
+
+        mutt_resize_screen();
+        window_invalidate_all();
         break;
 
       case OP_TAG:
@@ -500,8 +506,9 @@ int menu_loop(struct Menu *menu)
         break;
 
       case OP_REDRAW:
-        clearok(stdscr, true);
-        menu->redraw = MENU_REDRAW_FULL;
+        //QWQ Ctrl-L
+        mutt_resize_screen();
+        window_invalidate_all();
         break;
 
       case OP_HELP:

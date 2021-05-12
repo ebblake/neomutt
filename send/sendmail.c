@@ -419,7 +419,9 @@ int mutt_invoke_sendmail(struct Mailbox *m, struct AddressList *from,
    * So instead, just force a hard redraw on the next refresh. */
   if (!OptNoCurses)
   {
-    mutt_need_hard_redraw();
+    //QWQ EXTERNAL
+    mutt_resize_screen();
+    window_invalidate_all();
   }
 
   const short c_sendmail_wait = cs_subset_number(sub, "sendmail_wait");

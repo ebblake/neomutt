@@ -405,18 +405,22 @@ int mutt_display_message(struct MuttWindow *win_index, struct MuttWindow *win_ib
     unlink(mutt_buffer_string(tempfile));
     mutt_buffer_pool_release(&cmd);
 
-    if (!OptNoCurses)
-      keypad(stdscr, true);
+    //QWQ EXTERNAL
     if (r != -1)
       mutt_set_flag(m, e, MUTT_READ, true);
     const bool c_prompt_after = cs_subset_bool(NeoMutt->sub, "prompt_after");
     if ((r != -1) && c_prompt_after)
     {
       mutt_unget_event(mutt_any_key_to_continue(_("Command: ")), 0);
+      //QWQ SIGWINCH - handled by caller?
+      //QWQ LOOP - no repainting necesary
       rc = km_dokey(MENU_PAGER);
     }
     else
       rc = 0;
+
+    mutt_resize_screen();
+    window_invalidate_all();
   }
 
 cleanup:
