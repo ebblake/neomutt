@@ -118,6 +118,9 @@ STAILQ_HEAD(ColorLineList, ColorLine);
  * Observers will be passed a type of #NT_COLOR and a subtype of
  * #NT_COLOR_SET or #NT_COLOR_RESET with a struct which
  * describes the colour, e.g. #MT_COLOR_SIDEBAR_HIGHLIGHT.
+ *
+ * A combination of #NT_COLOR_RESET and #MT_COLOR_MAX means that all the
+ * colours have been reset (`uncolor *`).
  */
 struct EventColor
 {

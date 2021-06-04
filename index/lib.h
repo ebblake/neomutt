@@ -65,6 +65,5 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m);
 void mutt_set_header_color(struct Mailbox *m, struct Email *e);
 void mutt_update_index(struct Menu *menu, struct Context *ctx, enum MxStatus check, int oldcount, struct IndexSharedData *shared);
 struct MuttWindow *index_pager_init(void);
-void index_pager_shutdown(struct MuttWindow *dlg);
 
 #endif /* MUTT_INDEX_LIB_H */

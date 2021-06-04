@@ -4286,12 +4286,3 @@ struct MuttWindow *index_pager_init(void)
   index_add_observers(dlg);
   return dlg;
 }
-
-/**
- * index_pager_shutdown - Clear up any non-Window parts
- * @param dlg Dialog
- */
-void index_pager_shutdown(struct MuttWindow *dlg)
-{
-  index_remove_observers(dlg);
-}

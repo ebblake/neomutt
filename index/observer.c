@@ -42,6 +42,22 @@
 #include "shared_data.h"
 #include "subjectrx.h"
 
+void index_remove_observers(struct MuttWindow *dlg);
+
+/**
+ * window_get_menu - Find a Menu Window
+ * @param root Window to start searching
+ * @param type Panel type, e.g. #WT_INDEX
+ * @retval ptr Index Window
+ */
+struct MuttWindow *window_get_menu(struct MuttWindow *root, enum WindowType type)
+{
+  struct MuttWindow *panel = mutt_window_find(root, type);
+  struct MuttWindow *win = mutt_window_find(panel, WT_MENU);
+
+  return win;
+}
+
 /**
  * config_pager_index_lines - React to changes to $pager_index_lines
  * @param dlg Index Dialog
@@ -50,12 +66,12 @@
  */
 static int config_pager_index_lines(struct MuttWindow *dlg)
 {
-  struct MuttWindow *panel_index = mutt_window_find(dlg, WT_INDEX);
-  struct MuttWindow *panel_pager = mutt_window_find(dlg, WT_PAGER);
-  struct MuttWindow *win_index = mutt_window_find(panel_index, WT_MENU);
-  struct MuttWindow *win_pager = mutt_window_find(panel_pager, WT_MENU);
+  struct MuttWindow *win_index = window_get_menu(dlg, WT_INDEX);
+  struct MuttWindow *win_pager = window_get_menu(dlg, WT_PAGER);
   if (!win_index || !win_pager)
     return -1;
+
+  struct MuttWindow *panel_index = win_index->parent;
 
   struct MuttWindow *parent = win_pager->parent;
   if (parent->state.visible)
@@ -307,6 +323,33 @@ static int index_score_observer(struct NotifyCallback *nc)
 }
 
 /**
+ * index_window_observer - Listen for Window changes affecting the Index - Implements ::observer_t
+ */
+static int index_window_observer(struct NotifyCallback *nc)
+{
+  if (!nc->global_data)
+    return -1;
+  if (nc->event_type != NT_WINDOW)
+    return 0;
+
+  struct MuttWindow *win_index = nc->global_data;
+
+  if (nc->event_subtype == NT_WINDOW_STATE)
+  {
+    mutt_debug(LL_DEBUG5, "state, request WA_RECALC\n");
+    win_index->actions |= WA_RECALC;
+  }
+  else if (nc->event_subtype == NT_WINDOW_DELETE)
+  {
+    mutt_debug(LL_DEBUG5, "delete\n");
+    struct MuttWindow *dlg = nc->global_data;
+    index_remove_observers(dlg);
+  }
+
+  return 0;
+}
+
+/**
  * index_add_observers - Add Observers to the Index Dialog
  * @param dlg Index Dialog
  */
@@ -321,6 +364,10 @@ void index_add_observers(struct MuttWindow *dlg)
   notify_observer_add(NeoMutt->notify, NT_CONFIG, index_config_observer, dlg);
   notify_observer_add(NeoMutt->notify, NT_SCORE, index_score_observer, dlg);
   notify_observer_add(NeoMutt->notify, NT_SUBJRX, index_subjrx_observer, dlg);
+
+  struct MuttWindow *win_index = window_get_menu(dlg, WT_INDEX);
+  if (win_index)
+    notify_observer_add(win_index->notify, NT_WINDOW, index_window_observer, dlg);
 }
 
 /**
@@ -338,4 +385,8 @@ void index_remove_observers(struct MuttWindow *dlg)
   notify_observer_remove(NeoMutt->notify, index_config_observer, dlg);
   notify_observer_remove(NeoMutt->notify, index_score_observer, dlg);
   notify_observer_remove(NeoMutt->notify, index_subjrx_observer, dlg);
+
+  struct MuttWindow *win_index = window_get_menu(dlg, WT_INDEX);
+  if (win_index)
+    notify_observer_remove(win_index->notify, index_window_observer, dlg);
 }

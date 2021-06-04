@@ -141,6 +141,7 @@ enum NotifyEmail
 {
   NT_EMAIL_ADD = 1, ///< Email has been added
   NT_EMAIL_DELETE,  ///< Email is about to be deleted
+  NT_EMAIL_CHANGE,  ///< Email has changed
 };
 
 /**

@@ -24,6 +24,17 @@
  * @page pager_pbar Pager Bar
  *
  * Pager Bar
+ *
+ * ## Events
+ *
+ * | Event Type  | Handler                 |
+ * | :---------  | :---------------------- | 
+ * | #NT_COLOR   | pbar_color_observer()   |
+ * | #NT_CONFIG  | pbar_config_observer()  |
+ * | #NT_EMAIL   | pbar_email_observer()   |
+ * | #NT_MAILBOX | pbar_mailbox_observer() |
+ * | #NT_MENU    | pbar_menu_observer()    |
+ * | #NT_PAGER   | pbar_pager_observer()   |
  */
 
 #include "config.h"
@@ -102,6 +113,7 @@ static int pbar_recalc(struct MuttWindow *win)
   {
     mutt_str_replace(&pbar_data->pager_format, buf);
     win->actions |= WA_REPAINT;
+    mutt_debug(LL_DEBUG5, "recalc done, request WA_REPAINT\n");
   }
 
   return 0;
@@ -132,6 +144,9 @@ static int pbar_repaint(struct MuttWindow *win)
 
 /**
  * pbar_color_observer - Listen for changes to the Colours - Implements ::observer_t
+ *
+ * The Pager Bar is affected by `color status` commands (with or without a regex),
+ * and `uncolor *`.
  */
 static int pbar_color_observer(struct NotifyCallback *nc)
 {
@@ -143,17 +158,21 @@ static int pbar_color_observer(struct NotifyCallback *nc)
   struct EventColor *ev_c = nc->event_data;
   enum ColorId color = ev_c->color;
 
-  if (color != MT_COLOR_STATUS)
+  // MT_COLOR_MAX is sent on `uncolor *`
+  if ((color != MT_COLOR_STATUS) && (color != MT_COLOR_MAX))
     return 0;
 
   struct MuttWindow *win_pbar = nc->global_data;
   win_pbar->actions |= WA_REPAINT;
+  mutt_debug(LL_DEBUG5, "color, request WA_REPAINT\n");
 
   return 0;
 }
 
 /**
  * pbar_config_observer - Listen for changes to the Config - Implements ::observer_t
+ *
+ * The Pager Bar is only affected by changes to `$pager_format`.
  */
 static int pbar_config_observer(struct NotifyCallback *nc)
 {
@@ -165,11 +184,12 @@ static int pbar_config_observer(struct NotifyCallback *nc)
     return 0;
 
   struct EventConfig *ec = nc->event_data;
-  if ((ec->name[0] != 's') && (ec->name[0] != 't'))
+  if (!mutt_str_equal(ec->name, "pager_format"))
     return 0;
 
   struct MuttWindow *win_pbar = nc->global_data;
   win_pbar->actions |= WA_RECALC;
+  mutt_debug(LL_DEBUG5, "config, request WA_RECALC\n");
 
   return 0;
 }
