@@ -237,6 +237,7 @@ static int helpbar_window_observer(struct NotifyCallback *nc)
     if (!mutt_window_is_visible(win_helpbar))
       return 0;
 
+    mutt_debug(LL_NOTIFY, "focus\n");
     win_helpbar->actions |= WA_RECALC;
     mutt_debug(LL_DEBUG5, "window focus: request WA_RECALC\n");
   }
