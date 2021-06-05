@@ -664,11 +664,11 @@ msgid "source: reading aborted due to too many errors in %s"
 msgstr "source: lesing avbrutt som følge av for mange feil i %s"
 
 #: command_parse.c:264
-#, c-format
+#, fuzzy, c-format
 msgid "source: %d warning in %s"
 msgid_plural "source: %d warnings in %s"
-msgstr[0] "source: Fejl i %s"
-msgstr[1] "source: Feil i %s"
+msgstr[0] "source: %d Fejl i %s"
+msgstr[1] "source: %d Feil i %s"
 
 #: command_parse.c:297 command_parse.c:319 command_parse.c:464
 #: command_parse.c:1039 command_parse.c:1123 gui/color.c:736 gui/color.c:899
@@ -1088,7 +1088,7 @@ msgstr "Ustøttet e-postbokstype for tilføyelse"
 
 #: compmbox/compress.c:622
 msgid "Can't sync a compressed file without a close-hook"
-msgstr "Kan ikke synkronisere sammenpakket fil uten en lukkings-krok""
+msgstr "Kan ikke synkronisere sammenpakket fil uten en lukkings-krok"
 
 #: compmbox/compress.c:644 compmbox/compress.c:696
 #, c-format
@@ -2790,7 +2790,7 @@ msgstr "Ny e-post i denne e-postboksen"
 
 #: index/index.c:1273
 msgid "Mailbox was externally modified"
-msgstr "E-postboks ble endret eksternt
+msgstr "E-postboks ble endret eksternt"
 
 #: index/index.c:1412
 msgid "No tagged messages"
@@ -3159,8 +3159,7 @@ msgstr "Oppsettsvariabel «%s» er foreldet"
 #: keymap.c:407
 #, fuzzy, c-format
 msgid "Binding '%s' will alias '%s'  Before, try: 'bind %s %s noop'  https://neomutt.org/guide/configuration.html#bind-warnings"
-msgstr "Å tilknytte «%s» vil tilknytte alias «%s». Før dette kan du prøve
-«bind %s %s noop» https://neomutt.org/guide/configuration.html#bind-warnings"
+msgstr "Å tilknytte «%s» vil tilknytte alias «%s». Før dette kan du prøve «bind %s %s noop» https://neomutt.org/guide/configuration.html#bind-warnings"
 
 #: keymap.c:779
 #, fuzzy
@@ -3296,7 +3295,7 @@ msgid ""
 "          [-s <subject>] [-a <file> [...] --] <address> [...] < message"
 msgstr ""
 "  neomutt [-nx] [-e <kommando>] [-F <oppsett>] [-b <adresse>] [-c <adresse>]\n"
-"          [-s <emne>] [-a <fil> [...] --] <adresse> [...] < melding""
+"          [-s <emne>] [-a <fil> [...] --] <adresse> [...] < melding"
 
 #: main.c:165
 msgid "  neomutt [-nRy] [-e <command>] [-F <config>] [-f <mailbox>] [-m <type>]"
@@ -3449,7 +3448,7 @@ msgstr "  -i <inkluder>  Angi inkluderingsfil å innebygge i kroppen av en meldi
 
 #: main.c:202
 msgid "  -l <file>     Specify a file for debugging output (default \"~/.neomuttdebug0\")"
-msgstr "  -l <file>     Angi en fil for avlusingsutdata, (forvalget er «~/.neomuttdebug0\»)"
+msgstr "  -l <file>     Angi en fil for avlusingsutdata, (forvalget er «~/.neomuttdebug0»)"
 
 #: main.c:203
 #, fuzzy
@@ -3700,12 +3699,12 @@ msgstr "Lukket loggfil: %s"
 #: mutt/logging.c:138
 #, c-format
 msgid "Debugging at level %d to file '%s'"
-msgstr "Avlusing på nivå %d til filen «%s».\n"
+msgstr "Avlusing på nivå %d til filen «%s»."
 
 #: mutt/logging.c:192
 #, fuzzy, c-format
 msgid "Logging at level %d to file '%s'"
-msgstr "Logger på nivå %d til filen «%s».\n"
+msgstr "Logger på nivå %d til filen «%s»."
 
 #: mutt/path.c:423
 #, fuzzy
@@ -3944,7 +3943,7 @@ msgstr "Marker alle artikler som lest"
 #, c-format
 msgid "Move %d read message to %s?"
 msgid_plural "Move %d read messages to %s?"
-msgstr[0] "Flytt én lest melding til %s?"
+msgstr[0] "Flytt én %d lest melding til %s?"
 msgstr[1] "Flyt %d leste meldinger til %s?"
 
 #: mx.c:710 mx.c:954
@@ -3994,9 +3993,9 @@ msgid "Mailbox checkpointed"
 msgstr "E-postboks avhukingsmerket"
 
 #: mx.c:1343
-#, c-format
+#, fuzzy, c-format
 msgid "Can't open %s: it is a pipe"
-msgstr "Kan ikke åpne %s: det er et rør: %s"
+msgstr "Kan ikke åpne %s: det er et rør"
 
 #: ncrypt/crypt.c:80
 #, c-format
@@ -6432,7 +6431,7 @@ msgstr "Feil i uttrykk: %s"
 
 #: pattern/compile.c:95 pattern/compile.c:180 pattern/compile.c:991
 msgid "Empty expression"
-msgstr "Tomt uttrykk
+msgstr "Tomt uttrykk"
 
 #: pattern/compile.c:166
 #, fuzzy
@@ -6694,8 +6693,7 @@ msgstr "meldinger hvis meldings-ID samsvarer med EXPR"
 #. L10N: Pattern Completion Menu description for ~I
 #: pattern/flags.c:92
 msgid "messages whose Message-ID is included in the results returned from an external search program"
-msgstr "meldinger hvis meldings-ID er å finne i resultatene fra et eksternt
-søkeprogram"
+msgstr "meldinger hvis meldings-ID er å finne i resultatene fra et eksternt søkeprogram"
 
 #. L10N: Pattern Completion Menu description for ~k
 #: pattern/flags.c:95
@@ -7072,11 +7070,11 @@ msgstr "Jeg vet ikke hvordan jeg skriver ut %s-vedlegg"
 #. do not show it to the user.  So feel free to use a "generic
 #. plural" as plural translation if your language has one.
 #: recvattach.c:1215
-#, c-format
+#, fuzzy, c-format
 msgid "Print tagged attachment?"
 msgid_plural "Print %d tagged attachments?"
 msgstr[0] "Skriv ut etikettmerket vedlegg?"
-msgstr[1] "Skriv ut etikettmerkede vedlegg?"
+msgstr[1] "Skriv ut %d etikettmerkede vedlegg?"
 
 #: recvattach.c:1216
 #, c-format
