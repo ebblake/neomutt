@@ -30,6 +30,7 @@
 #include <stddef.h>
 #include "mutt/lib.h"
 #include "reflow.h"
+#include "menu/lib.h"
 #include "mutt_window.h"
 
 /**
@@ -223,6 +224,13 @@ void window_reflow(struct MuttWindow *win)
 {
   if (!win)
     return;
+
+  if (win->type == WT_MENU)
+  {
+    struct Menu *menu = win->wdata;
+    menu->redraw |= MENU_REDRAW_FLOW;
+  }
+
   if (win->orient == MUTT_WIN_ORIENT_VERTICAL)
     window_reflow_vert(win);
   else
