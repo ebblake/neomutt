@@ -1992,14 +1992,22 @@ void mutt_clear_pager_position(void)
 }
 
 /**
- * pager_custom_redraw - Redraw the pager window - Implements Menu::custom_redraw()
+ * pager_menu_repaint - Repaint the Pager Window - Implements MuttWindow::repaint()
  */
-static void pager_custom_redraw(struct Menu *pager_menu)
+static int pager_menu_repaint(struct MuttWindow *win)
 {
+  if (win->type != WT_MENU)
+    return 0;
+
+  if (!mutt_window_is_visible(win))
+    return 0;
+
+  struct Menu *menu = win->wdata;
+
   //---------------------------------------------------------------------------
   // ASSUMPTIONS & SANITY CHECKS
   //---------------------------------------------------------------------------
-  // Since pager_custom_redraw() is a static function and it is always called
+  // Since pager_menu_repaint() is a static function and it is always called
   // after mutt_pager() we can rely on a series of sanity checks in
   // mutt_pager(), namely:
   // - PAGER_MODE_EMAIL  guarantees ( data->email) and (!data->body)
@@ -2008,8 +2016,7 @@ static void pager_custom_redraw(struct Menu *pager_menu)
   //
   // Additionally, while refactoring is still in progress the following checks
   // are still here to ensure data model consistency.
-  assert(pager_menu);
-  struct PagerRedrawData *rd = pager_menu->mdata;
+  struct PagerRedrawData *rd = menu->mdata;
   assert(rd);        // Redraw function can't be called without it's data.
   assert(rd->pview); // Redraw data can't exist separately without the view.
   assert(rd->pview->pdata); // View can't exist without it's data
@@ -2022,7 +2029,7 @@ static void pager_custom_redraw(struct Menu *pager_menu)
   const short c_pager_index_lines =
       cs_subset_number(NeoMutt->sub, "pager_index_lines");
 
-  if (pager_menu->redraw & MENU_REDRAW_FULL)
+  if (menu->redraw & MENU_REDRAW_FULL)
   {
     mutt_curses_set_color(MT_COLOR_NORMAL);
     mutt_window_clear(rd->pview->win_pager);
@@ -2058,7 +2065,7 @@ static void pager_custom_redraw(struct Menu *pager_menu)
         }
       }
       rd->lines = Resize->line;
-      menu_queue_redraw(pager_menu, MENU_REDRAW_FLOW);
+      menu_queue_redraw(menu, MENU_REDRAW_FLOW);
 
       FREE(&Resize);
     }
@@ -2079,10 +2086,10 @@ static void pager_custom_redraw(struct Menu *pager_menu)
       menu_redraw_index(rd->menu);
     }
 
-    menu_queue_redraw(pager_menu, MENU_REDRAW_BODY | MENU_REDRAW_INDEX);
+    menu_queue_redraw(menu, MENU_REDRAW_BODY | MENU_REDRAW_INDEX);
   }
 
-  if (pager_menu->redraw & MENU_REDRAW_FLOW)
+  if (menu->redraw & MENU_REDRAW_FLOW)
   {
     if (!(rd->pview->flags & MUTT_PAGER_RETWINCH))
     {
@@ -2123,7 +2130,7 @@ static void pager_custom_redraw(struct Menu *pager_menu)
     }
   }
 
-  if ((pager_menu->redraw & MENU_REDRAW_BODY) || (rd->topline != rd->oldtopline))
+  if ((menu->redraw & MENU_REDRAW_BODY) || (rd->topline != rd->oldtopline))
   {
     do
     {
@@ -2163,7 +2170,8 @@ static void pager_custom_redraw(struct Menu *pager_menu)
     mutt_curses_set_color(MT_COLOR_NORMAL);
   }
 
-  pager_menu->redraw = MENU_REDRAW_NO_FLAGS;
+  menu->redraw = MENU_REDRAW_NO_FLAGS;
+  return 0;
 }
 
 /**
@@ -2397,9 +2405,11 @@ int mutt_pager(struct PagerView *pview)
 
   //---------- setup pager menu------------------------------------------------
   pager_menu = pview->win_pager->wdata;
-  pager_menu->custom_redraw = pager_custom_redraw;
   pager_menu->mdata = &rd;
   priv->menu = pager_menu;
+
+  //QWQ Override the Menu's repaint function
+  pager_menu->win_index->repaint = pager_menu_repaint;
 
   //---------- restore global state if needed ---------------------------------
   while (pview->mode == PAGER_MODE_EMAIL && (OldEmail == pview->pdata->email) // are we "resuming" to the same Email?
@@ -2407,7 +2417,7 @@ int mutt_pager(struct PagerView *pview)
          && rd.line_info[rd.curline].offset < (rd.sb.st_size - 1))
   {
     // needed to avoid SIGSEGV
-    pager_custom_redraw(pager_menu);
+    pager_menu_repaint(pager_menu->win_index); //QWQ ???
     // trick user, as if nothing happened
     // scroll down to previosly saved offset
     rd.topline = ((TopLine - rd.topline) > rd.lines) ? rd.topline + rd.lines : TopLine;
@@ -3120,6 +3130,7 @@ int mutt_pager(struct PagerView *pview)
         //=======================================================================
 
       case OP_REDRAW:
+        mutt_message("PAGER OP_REDRAW");
         //QWQ Ctrl-L
         mutt_resize_screen();
         window_invalidate_all();

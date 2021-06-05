@@ -297,9 +297,6 @@ int menu_loop(struct Menu *menu)
 
     mutt_curses_set_cursor(MUTT_CURSOR_INVISIBLE);
 
-    if (menu_redraw(menu) == OP_REDRAW)
-      return OP_REDRAW;
-
     /* give visual indication that the next command is a tag- command */
     if (menu->tagprefix)
       msgwin_set_text(MT_COLOR_NORMAL, "tag-");
@@ -506,6 +503,7 @@ int menu_loop(struct Menu *menu)
         break;
 
       case OP_REDRAW:
+        mutt_message("MENU OP_REDRAW");
         //QWQ Ctrl-L
         mutt_resize_screen();
         window_invalidate_all();

@@ -1091,12 +1091,14 @@ dsl_finish:
 }
 
 /**
- * index_custom_redraw - Redraw the index - Implements Menu::custom_redraw()
+ * index_menu_repaint - Repaint the Index Window - Implements MuttWindow::repaint()
  */
-static void index_custom_redraw(struct Menu *menu)
+static int index_menu_repaint(struct MuttWindow *win)
 {
-  if (menu->redraw & MENU_REDRAW_FULL)
-    menu_redraw_full(menu);
+  if (win->type != WT_MENU)
+    return 0;
+
+  struct Menu *menu = win->wdata;
 
   struct IndexSharedData *shared = menu->mdata;
   struct Mailbox *m = shared->mailbox;
@@ -1116,6 +1118,14 @@ static void index_custom_redraw(struct Menu *menu)
   }
 
   menu->redraw = MENU_REDRAW_NO_FLAGS;
+  return 0;
+}
+
+/**
+ * index_custom_redraw - Redraw the index - Implements Menu::custom_redraw()
+ */
+static void index_custom_redraw(struct Menu *menu)
+{
 }
 
 /**
@@ -1157,9 +1167,11 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
   priv->menu->mdata = shared;
   priv->menu->make_entry = index_make_entry;
   priv->menu->color = index_color;
-  priv->menu->custom_redraw = index_custom_redraw;
   menu_set_index(priv->menu, ci_first_message(shared->mailbox));
   mutt_window_reflow(NULL);
+
+  //QWQ Override the Menu's repaint function
+  priv->menu->win_index->repaint = index_menu_repaint;
 
   if (!priv->attach_msg)
   {
@@ -1888,6 +1900,7 @@ struct Mailbox *mutt_index_menu(struct MuttWindow *dlg, struct Mailbox *m_init)
       }
 
       case OP_REDRAW:
+        mutt_message("INDEX OP_REDRAW");
         //QWQ Ctrl-L
         mutt_resize_screen();
         window_invalidate_all();

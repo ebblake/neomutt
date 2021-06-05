@@ -56,10 +56,16 @@ static int menu_repaint(struct MuttWindow *win)
   if (win->type != WT_MENU)
     return 0;
 
-  // struct Menu *menu = win->wdata;
-  // menu_redraw(menu);
-  // menu->redraw = MENU_REDRAW_NO_FLAGS;
+  struct Menu *menu = win->wdata;
 
+  if (menu->redraw & MENU_REDRAW_INDEX)
+    menu_redraw_index(menu);
+  else if (menu->redraw & MENU_REDRAW_MOTION)
+    menu_redraw_motion(menu);
+  else if (menu->redraw == MENU_REDRAW_CURRENT)
+    menu_redraw_current(menu);
+
+  menu->redraw = MENU_REDRAW_NO_FLAGS;
   return 0;
 }
 
@@ -107,6 +113,8 @@ struct MuttWindow *menu_new_window(enum MenuType type, struct ConfigSubset *sub)
   win->wdata_free = menu_wdata_free;
 
   notify_observer_add(win->notify, NT_WINDOW, menu_window_observer, win);
+
+  menu->win_index = win;
 
   return win;
 }
