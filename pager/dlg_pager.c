@@ -3199,22 +3199,13 @@ int mutt_pager(struct PagerView *pview)
           break;
 
         int dretval = 0;
-        int new_topline = priv->topline;
+        int new_topline = 0;
 
-        if (!mutt_color_is_header(priv->line_info[new_topline].type))
-        {
-          /* L10N: Displayed if <skip-headers> is invoked in the pager, but we
-             are already past the headers */
-          mutt_message(_("Already skipped past headers"));
-          break;
-        }
-
-        while (((new_topline < priv->last_line) ||
-                (0 == (dretval = display_line(
+        while ((0 == (dretval = display_line(
                            priv->fp, &priv->last_pos, &priv->line_info, new_topline, &priv->last_line,
                            &priv->max_line, MUTT_TYPES | (pview->flags & MUTT_PAGER_NOWRAP),
                            &priv->quote_list, &priv->q_level, &priv->force_redraw,
-                           &priv->search_re, priv->pview->win_pager)))) &&
+                           &priv->search_re, priv->pview->win_pager))) &&
                mutt_color_is_header(priv->line_info[new_topline].type))
         {
           new_topline++;
