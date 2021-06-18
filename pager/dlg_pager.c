@@ -3132,9 +3132,10 @@ int mutt_pager(struct PagerView *pview)
           break;
 
         const short c_skip_quoted_offset =
-          cs_subset_number(NeoMutt->sub, "skip_quoted_offset");
+          cs_subset_number(NeoMutt->sub, "pager_skip_quoted_context");
         int dretval = 0;
         int new_topline = priv->topline;
+        int num_quoted = 0;
 
         /* Skip all the email headers */
         if (mutt_color_is_header(priv->line_info[new_topline].type))
